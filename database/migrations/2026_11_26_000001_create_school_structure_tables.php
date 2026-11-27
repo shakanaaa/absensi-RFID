@@ -53,14 +53,10 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->foreignId('school_id')->constrained()->cascadeOnDelete();
-            $table->string('student_no');
             $table->string('name');
             $table->string('gender')->nullable();
-            $table->date('birth_date')->nullable();
             $table->string('status')->default('active'); // active|lulus|nonaktif
             $table->timestamps();
-
-            $table->unique(['school_id', 'student_no']);
         });
 
         Schema::create('student_class_memberships', function (Blueprint $table) {

@@ -309,7 +309,7 @@ class RegistrationSessionController extends Controller
             ->where('s.status', 'active')
             ->orderBy('m.attendance_number')
             ->orderBy('s.name')
-            ->get(['s.id as student_id', 's.student_no', 's.name', 'm.attendance_number'])
+            ->get(['s.id as student_id', 's.name', 'm.attendance_number'])
             ->map(fn ($r) => (array) $r)
             ->all();
     }

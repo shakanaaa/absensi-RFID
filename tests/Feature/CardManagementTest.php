@@ -64,7 +64,7 @@ class CardManagementTest extends TestCase
     private function student(string $no, string $name): Student
     {
         $s = Student::create([
-            'school_id' => $this->school->id, 'student_no' => $no, 'name' => $name, 'status' => 'active',
+            'school_id' => $this->school->id, 'name' => $name, 'status' => 'active',
         ]);
         $s->memberships()->create([
             'class_id' => $this->class->id,
@@ -270,7 +270,7 @@ class CardManagementTest extends TestCase
     public function test_student_outside_class_cannot_be_scanned(): void
     {
         $outsider = Student::create([
-            'school_id' => $this->school->id, 'student_no' => '2026999', 'name' => 'Siswa Luar', 'status' => 'active',
+            'school_id' => $this->school->id, 'name' => 'Siswa Luar', 'status' => 'active',
         ]);
         $session = $this->openSession($this->petugas);
 

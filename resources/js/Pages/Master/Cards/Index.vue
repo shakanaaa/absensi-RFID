@@ -149,7 +149,6 @@ const remove = (card) => {
                                     <Link :href="route('master.students.show', card.active_assignment.student_id)" class="text-indigo-600 hover:underline">
                                         {{ card.active_assignment.student?.name }}
                                     </Link>
-                                    <span class="ml-1 text-xs text-gray-400">{{ card.active_assignment.student?.student_no }}</span>
                                 </template>
                                 <span v-else class="text-gray-400">—</span>
                             </td>
@@ -218,7 +217,7 @@ const remove = (card) => {
                             required
                         >
                             <option value="" disabled>Pilih siswa</option>
-                            <option v-for="s in students" :key="s.id" :value="s.id">{{ s.name }} ({{ s.student_no }})</option>
+                            <option v-for="s in students" :key="s.id" :value="s.id">{{ s.name }}</option>
                         </select>
                         <InputError :message="assignForm.errors.student_id" class="mt-1" />
                     </div>

@@ -44,7 +44,7 @@ class DailyReportService
                 ->whereHas('memberships', fn ($m) => $m
                     ->where('class_id', $class->id)->whereNull('to_date'))
                 ->orderBy('name')
-                ->get(['id', 'student_no', 'name']);
+                ->get(['id', 'name']);
 
             $sessions = AttendanceSession::where('school_id', $school->id)
                 ->whereDate('school_date', $date)

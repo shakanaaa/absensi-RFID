@@ -53,7 +53,7 @@ class ReportTest extends TestCase
             'status' => 'active',
         ]);
         $this->student = Student::create([
-            'school_id' => $this->school->id, 'student_no' => '001', 'name' => 'Siswa Satu', 'status' => 'active',
+            'school_id' => $this->school->id, 'name' => 'Siswa Satu', 'status' => 'active',
         ]);
         StudentClassMembership::create([
             'student_id' => $this->student->id, 'class_id' => $this->class->id,

@@ -39,10 +39,6 @@ const cardStatusLabel = {
             <!-- Ringkasan -->
             <div class="grid gap-4 rounded-lg bg-white p-6 shadow sm:grid-cols-2 lg:grid-cols-4">
                 <div>
-                    <p class="text-xs font-medium uppercase text-gray-500">NIS</p>
-                    <p class="mt-1 text-sm font-medium text-gray-900">{{ student.student_no }}</p>
-                </div>
-                <div>
                     <p class="text-xs font-medium uppercase text-gray-500">Status</p>
                     <p class="mt-1 text-sm font-medium text-gray-900">{{ statusLabel[student.status] ?? student.status }}</p>
                 </div>
@@ -51,10 +47,6 @@ const cardStatusLabel = {
                     <p class="mt-1 text-sm font-medium text-gray-900">
                         {{ student.gender === 'male' ? 'Laki-laki' : student.gender === 'female' ? 'Perempuan' : '-' }}
                     </p>
-                </div>
-                <div>
-                    <p class="text-xs font-medium uppercase text-gray-500">Tanggal Lahir</p>
-                    <p class="mt-1 text-sm font-medium text-gray-900">{{ student.birth_date ?? '-' }}</p>
                 </div>
             </div>
 

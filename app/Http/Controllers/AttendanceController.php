@@ -49,7 +49,7 @@ class AttendanceController extends Controller
                 ->where('status', 'active')
                 ->whereHas('memberships', fn ($m) => $m->where('class_id', $class->id)->whereNull('to_date'))
                 ->orderBy('name')
-                ->get(['id', 'student_no', 'name'])
+                ->get(['id', 'name'])
             : collect();
 
         $sessions = AttendanceSession::where('school_id', $school->id)
@@ -68,7 +68,6 @@ class AttendanceController extends Controller
 
             return [
                 'id' => $s->id,
-                'student_no' => $s->student_no,
                 'name' => $s->name,
                 'status' => $status,
                 'status_label' => AttendanceSession::statusLabel($status),

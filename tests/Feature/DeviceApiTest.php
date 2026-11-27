@@ -54,7 +54,7 @@ class DeviceApiTest extends TestCase
         ]);
 
         $this->student = Student::create([
-            'school_id' => $this->school->id, 'student_no' => '001', 'name' => 'Siswa API', 'status' => 'active',
+            'school_id' => $this->school->id, 'name' => 'Siswa API', 'status' => 'active',
         ]);
         $this->student->memberships()->create([
             'class_id' => $class->id, 'academic_year_id' => $year->id, 'from_date' => '2026-01-01',

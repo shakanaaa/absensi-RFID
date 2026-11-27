@@ -24,7 +24,7 @@ class RfidCardController extends Controller
     {
         $this->authorize('viewAny', RfidCard::class);
 
-        $query = RfidCard::with(['activeAssignment.student:id,student_no,name'])
+        $query = RfidCard::with(['activeAssignment.student:id,name'])
             ->withCount('assignments');
 
         // Kartu bersifat global; batasi ke kartu yang belum pernah dipakai
@@ -50,7 +50,7 @@ class RfidCardController extends Controller
             'cards' => $cards,
             'filters' => $request->only(['status', 'q']),
             'students' => $request->user()->can('create', RfidCard::class)
-                ? \App\Models\Student::where('school_id', $schoolId)->where('status', 'active')->orderBy('name')->get(['id', 'student_no', 'name'])
+                ? \App\Models\Student::where('school_id', $schoolId)->where('status', 'active')->orderBy('name')->get(['id', 'name'])
                 : [],
         ]);
     }

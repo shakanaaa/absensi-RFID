@@ -110,7 +110,6 @@ class DatabaseSeeder extends Seeder
         foreach (range(1, 5) as $i) {
             $student = Student::create([
                 'school_id' => $school->id,
-                'student_no' => sprintf('2026%03d', $i),
                 'name' => "Siswa Demo {$i}",
                 'status' => 'active',
             ]);

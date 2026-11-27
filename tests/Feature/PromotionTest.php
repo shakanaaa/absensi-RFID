@@ -66,7 +66,7 @@ class PromotionTest extends TestCase
         static $n = 0;
         $n++;
         $student = Student::create([
-            'school_id' => $this->school->id, 'student_no' => 'S'.$n, 'name' => 'Siswa '.$n, 'status' => $status,
+            'school_id' => $this->school->id, 'name' => 'Siswa '.$n, 'status' => $status,
         ]);
         StudentClassMembership::create([
             'student_id' => $student->id, 'class_id' => $class->id,

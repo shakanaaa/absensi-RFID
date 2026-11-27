@@ -37,7 +37,7 @@ const applyFilters = () => {
                     <input
                         v-model="search"
                         type="search"
-                        placeholder="Cari nama / NIS..."
+                        placeholder="Cari nama..."
                         class="w-full max-w-xs rounded-md border-gray-300 text-sm shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
                         @keyup.enter="applyFilters"
                     />
@@ -63,7 +63,6 @@ const applyFilters = () => {
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">NIS</th>
                             <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Nama</th>
                             <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Kelas</th>
                             <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">No. Absen</th>
@@ -73,7 +72,6 @@ const applyFilters = () => {
                     </thead>
                     <tbody class="divide-y divide-gray-200">
                         <tr v-for="student in students.data" :key="student.id">
-                            <td class="px-4 py-3 text-sm text-gray-600">{{ student.student_no }}</td>
                             <td class="px-4 py-3 text-sm font-medium text-gray-900">
                                 <Link :href="route('master.students.show', student.id)" class="text-indigo-600 hover:underline">
                                     {{ student.name }}

@@ -18,15 +18,11 @@ const isEdit = computed(() => !!props.student);
 const membership = props.student?.memberships?.[0] ?? null;
 
 const form = useForm({
-    student_no: props.student?.student_no ?? '',
     name: props.student?.name ?? '',
     gender: props.student?.gender ?? '',
-    birth_date: props.student?.birth_date ?? '',
     status: props.student?.status ?? 'active',
     class_id: membership?.class_id ?? '',
     academic_year_id: membership?.academic_year_id ?? props.defaults?.academic_year_id ?? '',
-    from_date: membership?.from_date ?? props.defaults?.from_date ?? '',
-    to_date: membership?.to_date ?? '',
     attendance_number: membership?.attendance_number ?? '',
 });
 
@@ -51,20 +47,13 @@ const submit = () => {
 
         <div class="mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">
             <form class="space-y-5 rounded-lg bg-white p-6 shadow" @submit.prevent="submit">
-                <div class="grid gap-4 sm:grid-cols-2">
-                    <div>
-                        <InputLabel for="student_no" value="NIS / NISN" />
-                        <TextInput id="student_no" v-model="form.student_no" class="mt-1 w-full" required />
-                        <InputError :message="form.errors.student_no" class="mt-1" />
-                    </div>
-                    <div>
-                        <InputLabel for="name" value="Nama Lengkap" />
-                        <TextInput id="name" v-model="form.name" class="mt-1 w-full" required />
-                        <InputError :message="form.errors.name" class="mt-1" />
-                    </div>
+                <div>
+                    <InputLabel for="name" value="Nama Lengkap" />
+                    <TextInput id="name" v-model="form.name" class="mt-1 w-full" required />
+                    <InputError :message="form.errors.name" class="mt-1" />
                 </div>
 
-                <div class="grid gap-4 sm:grid-cols-3">
+                <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <InputLabel for="gender" value="Jenis Kelamin" />
                         <select
@@ -77,11 +66,6 @@ const submit = () => {
                             <option value="female">Perempuan</option>
                         </select>
                         <InputError :message="form.errors.gender" class="mt-1" />
-                    </div>
-                    <div>
-                        <InputLabel for="birth_date" value="Tanggal Lahir" />
-                        <TextInput id="birth_date" v-model="form.birth_date" type="date" class="mt-1 w-full" />
-                        <InputError :message="form.errors.birth_date" class="mt-1" />
                     </div>
                     <div>
                         <InputLabel for="status" value="Status" />
@@ -135,16 +119,6 @@ const submit = () => {
                                 <option v-for="y in years" :key="y.id" :value="y.id">{{ y.name }}</option>
                             </select>
                             <InputError :message="form.errors.academic_year_id" class="mt-1" />
-                        </div>
-                        <div>
-                            <InputLabel for="from_date" value="Berlaku Mulai" />
-                            <TextInput id="from_date" v-model="form.from_date" type="date" class="mt-1 w-full" required />
-                            <InputError :message="form.errors.from_date" class="mt-1" />
-                        </div>
-                        <div>
-                            <InputLabel for="to_date" value="Berlaku Sampai (opsional)" />
-                            <TextInput id="to_date" v-model="form.to_date" type="date" class="mt-1 w-full" />
-                            <InputError :message="form.errors.to_date" class="mt-1" />
                         </div>
                     </div>
                 </fieldset>

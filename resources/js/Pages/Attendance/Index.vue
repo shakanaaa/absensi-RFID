@@ -106,7 +106,6 @@ const pickClass = (e) => {
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-50">
                             <tr>
-                                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">No. Absen</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Nama</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Status</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Masuk</th>
@@ -115,7 +114,6 @@ const pickClass = (e) => {
                         </thead>
                         <tbody class="divide-y divide-gray-100">
                             <tr v-for="s in students" :key="s.id">
-                                <td class="px-4 py-2 text-sm text-gray-500">{{ s.student_no }}</td>
                                 <td class="px-4 py-2 text-sm font-medium text-gray-900">{{ s.name }}</td>
                                 <td class="px-4 py-2">
                                     <span class="rounded-full px-2 py-0.5 text-xs font-medium" :class="statusClass[s.status]">

@@ -219,7 +219,6 @@ watch(() => props.nextStudentId, autoPick, { immediate: true });
                             <tr>
                                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">No</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Nama</th>
-                                <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">NIS</th>
                                 <th class="px-4 py-3 text-left text-xs font-medium uppercase text-gray-500">Kartu</th>
                                 <th class="px-4 py-3 text-right text-xs font-medium uppercase text-gray-500">Aksi</th>
                             </tr>
@@ -235,7 +234,6 @@ watch(() => props.nextStudentId, autoPick, { immediate: true });
                                     {{ row.name }}
                                     <span v-if="row.skipped" class="ml-1 rounded bg-gray-200 px-1.5 py-0.5 text-xs text-gray-600">di-skip</span>
                                 </td>
-                                <td class="px-4 py-2.5 text-sm text-gray-600">{{ row.student_no }}</td>
                                 <td class="px-4 py-2.5 font-mono text-sm" :class="row.card_uid ? 'text-green-700' : 'text-gray-400'">
                                     {{ row.card_uid ?? '—' }}
                                 </td>

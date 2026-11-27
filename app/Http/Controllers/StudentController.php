@@ -25,7 +25,7 @@ class StudentController extends Controller
 
         if ($request->filled('q')) {
             $q = $request->string('q')->trim()->toString();
-            $query->where(fn ($w) => $w->where('name', 'like', "%{$q}%")->orWhere('student_no', 'like', "%{$q}%"));
+            $query->where('name', 'like', "%{$q}%");
         }
 
         if ($request->filled('class_id')) {
@@ -64,13 +64,13 @@ class StudentController extends Controller
             'student' => null,
             'classes' => $this->classes($request),
             'years' => $this->years($request),
-            'defaults' => ['academic_year_id' => $defaultYear, 'from_date' => now()->toDateString()],
+            'defaults' => ['academic_year_id' => $defaultYear],
         ]);
     }
 
     public function store(StudentRequest $request): RedirectResponse
     {
-        $data = $request->safe()->except(['class_id', 'academic_year_id', 'from_date', 'to_date', 'attendance_number']);
+        $data = $request->safe()->except(['class_id', 'academic_year_id', 'attendance_number']);
 
         $student = DB::transaction(function () use ($request, $data) {
             $student = Student::create($data + ['school_id' => $request->user()->school_id]);
@@ -79,7 +79,7 @@ class StudentController extends Controller
             return $student;
         });
 
-        AuditLogger::log('student.created', Student::class, $student, after: $student->only(['student_no', 'name', 'status']));
+        AuditLogger::log('student.created', Student::class, $student, after: $student->only(['name', 'status']));
 
         return redirect()->route('master.students.show', $student)->with('success', 'Siswa ditambahkan.');
     }
@@ -116,14 +116,14 @@ class StudentController extends Controller
 
     public function update(StudentRequest $request, Student $student): RedirectResponse
     {
-        $data = $request->safe()->except(['class_id', 'academic_year_id', 'from_date', 'to_date', 'attendance_number']);
+        $data = $request->safe()->except(['class_id', 'academic_year_id', 'attendance_number']);
 
         DB::transaction(function () use ($request, $student, $data) {
-            $before = $student->only(['student_no', 'name', 'gender', 'birth_date', 'status']);
+            $before = $student->only(['name', 'gender', 'status']);
             $student->update($data);
             $this->syncMembership($student, $request->validated());
 
-            AuditLogger::log('student.updated', Student::class, $student, before: $before, after: $student->only(['student_no', 'name', 'gender', 'birth_date', 'status']));
+            AuditLogger::log('student.updated', Student::class, $student, before: $before, after: $student->only(['name', 'gender', 'status']));
         });
 
         return redirect()->route('master.students.show', $student)->with('success', 'Siswa diperbarui.');
@@ -154,9 +154,9 @@ class StudentController extends Controller
     }
 
     /**
-     * Sinkronkan keanggotaan kelas efektif. Jika siswa sudah punya membership
-     * aktif di kelas/tahun yang sama, perbarui; jika beda, tutup yang lama
-     * (to_date = from_date baru - 1 hari) dan buat yang baru — histori tidak dihapus.
+     * Sinkronkan keanggotaan kelas efektif. from_date otomatis = hari ini;
+     * to_date hanya diisi sistem saat membership ditutup (pindah kelas,
+     * promosi, nonaktif) — bukan input manual.
      */
     private function syncMembership(Student $student, array $data): void
     {
@@ -170,23 +170,30 @@ class StudentController extends Controller
 
         if ($sameTarget) {
             $active->update([
-                'from_date' => $data['from_date'],
-                'attendance_number' => $data['attendance_number'] ?? $active->attendance_number,
+                'attendance_number' => array_key_exists('attendance_number', $data)
+                    ? $data['attendance_number']
+                    : $active->attendance_number,
             ]);
 
             return;
         }
 
+        $fromDate = now()->toDateString();
+
         if ($active) {
-            $active->update(['to_date' => \Carbon\Carbon::parse($data['from_date'])->subDay()->toDateString()]);
+            // Tutup membership lama sehari sebelum yang baru mulai.
+            $toDate = \Carbon\Carbon::parse($fromDate)->subDay()->toDateString();
+            if ($toDate < $active->from_date->toDateString()) {
+                $toDate = $active->from_date->toDateString();
+            }
+            $active->update(['to_date' => $toDate]);
         }
 
         StudentClassMembership::create([
             'student_id' => $student->id,
             'class_id' => $data['class_id'],
             'academic_year_id' => $data['academic_year_id'],
-            'from_date' => $data['from_date'],
-            'to_date' => $data['to_date'] ?? null,
+            'from_date' => $fromDate,
             'attendance_number' => $data['attendance_number'] ?? null,
         ]);
     }

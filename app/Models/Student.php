@@ -10,11 +10,6 @@ class Student extends Model
 {
     protected $guarded = [];
 
-    protected function casts(): array
-    {
-        return ['birth_date' => 'date'];
-    }
-
     public function school(): BelongsTo
     {
         return $this->belongsTo(School::class);
