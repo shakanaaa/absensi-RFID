@@ -4,19 +4,26 @@ namespace App\Services;
 
 use App\Models\AcademicYear;
 use App\Models\SchoolHoliday;
+use App\Models\SchoolSetting;
 use Illuminate\Support\Carbon;
 
 /**
- * Hari sekolah efektif = Senin–Jumat, dalam rentang tahun ajaran aktif,
- * dan bukan hari libur (school_holidays).
+ * Hari sekolah efektif = hari bukan libur mingguan (school_settings.
+ * weekly_off_days, default Sabtu–Minggu), dalam rentang tahun ajaran
+ * aktif, dan bukan hari libur (school_holidays).
  */
 class SchoolDayService
 {
+    public const DEFAULT_OFF_DAYS = [6, 7]; // Sabtu, Minggu (ISO-8601)
+
     public function isEffectiveSchoolDay(int $schoolId, string $date): bool
     {
         $day = Carbon::parse($date);
 
-        if ($day->isWeekend()) {
+        $offDays = SchoolSetting::where('school_id', $schoolId)->first()?->weekly_off_days
+            ?? self::DEFAULT_OFF_DAYS;
+
+        if (in_array($day->dayOfWeekIso, $offDays, true)) {
             return false;
         }
 

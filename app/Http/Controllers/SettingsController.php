@@ -7,6 +7,7 @@ use App\Models\SchoolHoliday;
 use App\Models\SchoolSetting;
 use App\Services\AuditLogger;
 use App\Services\HolidayService;
+use App\Services\SchoolDayService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -36,6 +37,7 @@ class SettingsController extends Controller
                 'check_out_time' => $settings->check_out_time?->format('H:i'),
                 'whatsapp_number' => $settings->whatsapp_number,
                 'report_send_time' => $settings->report_send_time?->format('H:i'),
+                'weekly_off_days' => $settings->weekly_off_days ?? SchoolDayService::DEFAULT_OFF_DAYS,
             ],
             'holidays' => SchoolHoliday::where('school_id', $school->id)
                 ->orderBy('holiday_date')->get(['id', 'holiday_date', 'name']),
@@ -56,6 +58,8 @@ class SettingsController extends Controller
             'check_out_time' => ['required', 'date_format:H:i', 'after:check_in_time'],
             'whatsapp_number' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s()]+$/'],
             'report_send_time' => ['nullable', 'date_format:H:i'],
+            'weekly_off_days' => ['present', 'array'],
+            'weekly_off_days.*' => ['integer', 'between:1,7'],
         ]);
 
         $school = School::findOrFail($request->user()->school_id);
@@ -67,6 +71,7 @@ class SettingsController extends Controller
                 'check_out_time' => $data['check_out_time'].':00',
                 'whatsapp_number' => $data['whatsapp_number'] ?? null,
                 'report_send_time' => isset($data['report_send_time']) ? $data['report_send_time'].':00' : null,
+                'weekly_off_days' => array_values(array_unique(array_map('intval', $data['weekly_off_days']))),
             ]
         );
 

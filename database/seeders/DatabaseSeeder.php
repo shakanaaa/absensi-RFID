@@ -32,6 +32,7 @@ class DatabaseSeeder extends Seeder
             'check_in_time' => '07:00:00',
             'check_out_time' => '15:00:00',
             'whatsapp_number' => null,
+            'weekly_off_days' => [6, 7],
         ]);
 
         User::create([

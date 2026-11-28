@@ -20,7 +20,27 @@ const form = useForm({
     check_out_time: props.settings.check_out_time ?? '15:00',
     whatsapp_number: props.settings.whatsapp_number ?? '',
     report_send_time: props.settings.report_send_time ?? '',
+    weekly_off_days: [...(props.settings.weekly_off_days ?? [6, 7])],
 });
+
+const WEEKDAYS = [
+    { value: 1, label: 'Sen' },
+    { value: 2, label: 'Sel' },
+    { value: 3, label: 'Rab' },
+    { value: 4, label: 'Kam' },
+    { value: 5, label: 'Jum' },
+    { value: 6, label: 'Sab' },
+    { value: 7, label: 'Min' },
+];
+
+const toggleOffDay = (day) => {
+    const i = form.weekly_off_days.indexOf(day);
+    if (i === -1) {
+        form.weekly_off_days.push(day);
+    } else {
+        form.weekly_off_days.splice(i, 1);
+    }
+};
 
 const holidayForm = useForm({ holiday_date: '', name: '' });
 const generateForm = useForm({ year: props.holidayYear });
@@ -79,6 +99,28 @@ const holidayDates = computed(() => new Set(props.holidays.map((h) => h.holiday_
                         <TextInput id="report_send_time" v-model="form.report_send_time" type="time" class="mt-1 w-full" />
                         <InputError :message="form.errors.report_send_time" class="mt-1" />
                     </div>
+                </div>
+
+                <div>
+                    <InputLabel value="Hari Libur Mingguan" />
+                    <div class="mt-2 flex flex-wrap gap-2">
+                        <label
+                            v-for="d in WEEKDAYS"
+                            :key="d.value"
+                            class="flex cursor-pointer items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm"
+                            :class="form.weekly_off_days.includes(d.value) ? 'border-indigo-500 bg-indigo-50 text-indigo-700' : 'border-gray-300 text-gray-600'"
+                        >
+                            <input
+                                type="checkbox"
+                                class="sr-only"
+                                :checked="form.weekly_off_days.includes(d.value)"
+                                @change="toggleOffDay(d.value)"
+                            />
+                            {{ d.label }}
+                        </label>
+                    </div>
+                    <InputError :message="form.errors.weekly_off_days" class="mt-1" />
+                    <p class="mt-1 text-xs text-gray-500">Hari yang dipilih tidak dihitung sebagai hari sekolah (tidak ada status tidak hadir).</p>
                 </div>
 
                 <div class="flex justify-end">
