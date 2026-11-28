@@ -106,12 +106,6 @@ const masterLinks = [
                         >
                             Pengaturan
                         </SideNavLink>
-                        <SideNavLink
-                            :href="route('users.index')"
-                            :active="route().current('users.*')"
-                        >
-                            Akun &amp; Role
-                        </SideNavLink>
                     </div>
                 </template>
             </nav>

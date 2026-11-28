@@ -88,7 +88,7 @@ class SchoolDayTest extends TestCase
     public function test_admin_can_update_weekly_off_days(): void
     {
         $admin = User::create([
-            'name' => 'Admin', 'email' => 'admin@smk.test',
+            'name' => 'Admin', 'username' => 'admin-smk', 'email' => 'admin@smk.test',
             'password' => Hash::make('password'),
             'school_id' => $this->school->id, 'role' => 'admin', 'status' => 'active',
         ]);
@@ -105,7 +105,7 @@ class SchoolDayTest extends TestCase
     public function test_petugas_piket_cannot_update_settings(): void
     {
         $piket = User::create([
-            'name' => 'Piket', 'email' => 'piket@smk.test',
+            'name' => 'Piket', 'username' => 'piket-smk', 'email' => 'piket@smk.test',
             'password' => Hash::make('password'),
             'school_id' => $this->school->id, 'role' => 'petugas_piket', 'status' => 'active',
         ]);

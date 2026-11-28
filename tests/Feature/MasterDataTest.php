@@ -34,6 +34,7 @@ class MasterDataTest extends TestCase
     {
         return User::create([
             'name' => ucfirst(str_replace('_', ' ', $role)),
+            'username' => $email,
             'email' => $email,
             'password' => Hash::make('password'),
             'school_id' => $this->school->id,
@@ -74,28 +75,12 @@ class MasterDataTest extends TestCase
         $this->actingAs($this->piket)->get(route('master.academic-years.create'))->assertForbidden();
         $this->actingAs($this->piket)->get(route('settings.index'))->assertForbidden();
         $this->actingAs($this->piket)->get(route('promotion.index'))->assertForbidden();
-        $this->actingAs($this->piket)->get(route('users.index'))->assertForbidden();
     }
 
     public function test_guest_is_redirected_to_login(): void
     {
         $this->get(route('master.students.index'))->assertRedirect(route('login'));
         $this->get(route('dashboard'))->assertRedirect(route('login'));
-    }
-
-    public function test_admin_can_manage_users_and_role_change_is_audited(): void
-    {
-        $target = $this->user('target@uji.test', 'petugas_piket');
-
-        $this->actingAs($this->admin)
-            ->patch(route('users.update', $target), [
-                'name' => 'Target Baru', 'role' => 'admin',
-                'status' => 'active', 'phone' => null,
-            ])
-            ->assertRedirect(route('users.index'));
-
-        $this->assertEquals('admin', $target->fresh()->role);
-        $this->assertDatabaseHas('audit_logs', ['action' => 'user.role_changed']);
     }
 
     public function test_only_two_roles_exist(): void

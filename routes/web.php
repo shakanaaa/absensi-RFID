@@ -14,7 +14,6 @@ use App\Http\Controllers\SchoolClassController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => redirect()->route('dashboard'));
@@ -94,17 +93,6 @@ Route::middleware(['auth', 'verified', 'role:admin'])->group(function () {
     Route::get('/promotion', [PromotionController::class, 'index'])->name('promotion.index');
     Route::post('/promotion/prepare-year', [PromotionController::class, 'prepareYear'])->name('promotion.prepare-year');
     Route::post('/promotion/promote', [PromotionController::class, 'promote'])->name('promotion.promote');
-});
-
-Route::middleware(['auth', 'verified'])->prefix('users')->name('users.')->group(function () {
-    Route::get('/', [UserManagementController::class, 'index'])->middleware('role:admin')->name('index');
-    Route::middleware('role:admin')->group(function () {
-        Route::get('/create', [UserManagementController::class, 'create'])->name('create');
-        Route::post('/', [UserManagementController::class, 'store'])->name('store');
-        Route::get('/{user}/edit', [UserManagementController::class, 'edit'])->name('edit');
-        Route::patch('/{user}', [UserManagementController::class, 'update'])->name('update');
-        Route::delete('/{user}', [UserManagementController::class, 'destroy'])->name('destroy');
-    });
 });
 
 require __DIR__.'/auth.php';

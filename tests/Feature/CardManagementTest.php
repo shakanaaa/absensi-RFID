@@ -55,7 +55,7 @@ class CardManagementTest extends TestCase
     private function user(string $email, string $role): User
     {
         return User::create([
-            'name' => $email, 'email' => $email, 'password' => Hash::make('password'),
+            'name' => $email, 'username' => $email, 'email' => $email, 'password' => Hash::make('password'),
             'school_id' => $this->school->id, 'role' => $role, 'status' => 'active',
             'email_verified_at' => now(),
         ]);

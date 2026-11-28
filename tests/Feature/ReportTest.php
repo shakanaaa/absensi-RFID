@@ -67,7 +67,7 @@ class ReportTest extends TestCase
         $n++;
 
         return User::create([
-            'name' => ucfirst($role).$n, 'email' => $email,
+            'name' => ucfirst($role).$n, 'username' => $email, 'email' => $email,
             'password' => Hash::make('password'),
             'school_id' => $this->school->id,
             'role' => $role, 'status' => 'active', 'email_verified_at' => now(),

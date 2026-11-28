@@ -135,7 +135,7 @@ class LateDeadlineTest extends TestCase
     public function test_admin_can_save_late_deadline(): void
     {
         $admin = User::create([
-            'name' => 'Admin', 'email' => 'admin@telat.test',
+            'name' => 'Admin', 'username' => 'admin-telat', 'email' => 'admin@telat.test',
             'password' => Hash::make('password'),
             'school_id' => $this->school->id, 'role' => 'admin', 'status' => 'active',
         ]);
@@ -154,7 +154,7 @@ class LateDeadlineTest extends TestCase
     public function test_deadline_must_be_between_in_and_out(): void
     {
         $admin = User::create([
-            'name' => 'Admin', 'email' => 'admin2@telat.test',
+            'name' => 'Admin', 'username' => 'admin2-telat', 'email' => 'admin2@telat.test',
             'password' => Hash::make('password'),
             'school_id' => $this->school->id, 'role' => 'admin', 'status' => 'active',
         ]);

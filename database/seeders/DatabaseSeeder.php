@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => 'Admin Sekolah',
+            'username' => 'admin',
             'email' => 'admin@absensi.test',
             'password' => Hash::make('password'),
             'school_id' => $school->id,
@@ -47,6 +48,7 @@ class DatabaseSeeder extends Seeder
 
         User::create([
             'name' => 'Guru Piket',
+            'username' => 'guru.piket',
             'email' => 'guru.piket@absensi.test',
             'password' => Hash::make('password'),
             'school_id' => $school->id,

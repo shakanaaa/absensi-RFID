@@ -70,7 +70,7 @@ class ScanTest extends TestCase
     private function user(string $email, string $role): User
     {
         return User::create([
-            'name' => $role, 'email' => $email,
+            'name' => $role, 'username' => $email, 'email' => $email,
             'password' => Hash::make('password'),
             'school_id' => $this->school->id, 'role' => $role, 'status' => 'active',
         ]);

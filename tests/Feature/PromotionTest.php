@@ -31,11 +31,11 @@ class PromotionTest extends TestCase
 
         $this->school = School::create(['name' => 'SMA Promo', 'code' => 'SMA-PROMO', 'timezone' => 'Asia/Jakarta']);
         $this->admin = User::create([
-            'name' => 'Admin', 'email' => 'admin@promo.test', 'password' => Hash::make('password'),
+            'name' => 'Admin', 'username' => 'admin-promo', 'email' => 'admin@promo.test', 'password' => Hash::make('password'),
             'school_id' => $this->school->id, 'role' => 'admin', 'status' => 'active', 'email_verified_at' => now(),
         ]);
         $this->piket = User::create([
-            'name' => 'Piket', 'email' => 'piket@promo.test', 'password' => Hash::make('password'),
+            'name' => 'Piket', 'username' => 'piket-promo', 'email' => 'piket@promo.test', 'password' => Hash::make('password'),
             'school_id' => $this->school->id, 'role' => 'petugas_piket', 'status' => 'active', 'email_verified_at' => now(),
         ]);
 
