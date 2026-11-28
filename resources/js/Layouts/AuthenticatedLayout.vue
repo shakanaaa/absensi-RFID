@@ -57,6 +57,12 @@ const masterLinks = [
 
                 <div class="mt-6 space-y-1">
                     <SideNavLink
+                        :href="route('scan.index')"
+                        :active="route().current('scan.*')"
+                    >
+                        Scan Absensi
+                    </SideNavLink>
+                    <SideNavLink
                         :href="route('attendance.index')"
                         :active="route().current('attendance.*')"
                     >

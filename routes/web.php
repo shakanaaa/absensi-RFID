@@ -11,6 +11,7 @@ use App\Http\Controllers\RegistrationSessionController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\RfidCardController;
 use App\Http\Controllers\SchoolClassController;
+use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\TerminalController;
@@ -82,6 +83,12 @@ Route::middleware(['auth', 'verified', 'role:admin,petugas_piket'])->prefix('mas
     Route::post('/terminals/{terminal}/token', [TerminalController::class, 'issueToken'])->name('terminals.token');
     Route::post('/terminals/{terminal}/pairing-code', [TerminalController::class, 'createPairingCode'])->name('terminals.pairing-code');
     Route::post('/terminal-tokens/{token}/revoke', [TerminalController::class, 'revokeToken'])->name('terminal-tokens.revoke');
+});
+
+// Scan absensi via reader keyboard-wedge di browser — admin + petugas piket.
+Route::middleware(['auth', 'verified', 'role:admin,petugas_piket'])->group(function () {
+    Route::get('/scan', [ScanController::class, 'index'])->name('scan.index');
+    Route::post('/scan', [ScanController::class, 'store'])->name('scan.store');
 });
 
 // Pengaturan & kenaikan kelas — admin saja.
