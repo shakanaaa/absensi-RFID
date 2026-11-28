@@ -5,11 +5,14 @@ namespace Tests\Feature;
 use App\Models\AcademicYear;
 use App\Models\Concentration;
 use App\Models\Grade;
+use App\Models\RfidCard;
 use App\Models\School;
 use App\Models\SchoolClass;
 use App\Models\Student;
+use App\Models\StudentCardAssignment;
 use App\Models\StudentClassMembership;
 use App\Models\User;
+use App\Services\CardService;
 use App\Services\PromotionService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Hash;
@@ -134,6 +137,25 @@ class PromotionTest extends TestCase
         $this->assertNotNull(
             StudentClassMembership::where('student_id', $siswaXII->id)->whereNotNull('to_date')->first()
         );
+    }
+
+    public function test_lulus_releases_rfid_card(): void
+    {
+        $classXII = $this->classIn('XII', 'XII-1', 'XII IPA 1');
+        $siswaXII = $this->studentIn($classXII, $this->yearX);
+
+        $card = RfidCard::create(['uid_text' => 'UID-LULUS', 'status' => 'active']);
+        app(CardService::class)->assign($card, $siswaXII);
+
+        app(PromotionService::class)->prepareYear(
+            $this->school->id, '2026/2027', '2026-07-01', '2027-06-30'
+        );
+        app(PromotionService::class)->promoteAll($this->school->id);
+
+        $this->assertEquals('lulus', $siswaXII->fresh()->status);
+        $this->assertEquals('unassigned', $card->fresh()->status);
+        $this->assertEquals('unassigned',
+            StudentCardAssignment::where('rfid_card_id', $card->id)->firstOrFail()->status);
     }
 
     public function test_piket_cannot_access_promotion(): void

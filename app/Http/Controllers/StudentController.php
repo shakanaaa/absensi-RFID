@@ -123,6 +123,18 @@ class StudentController extends Controller
             $student->update($data);
             $this->syncMembership($student, $request->validated());
 
+            // Status non-aktif → tutup membership & lepas kartu agar tidak menggantung.
+            if (in_array($student->status, ['inactive', 'lulus'], true) && $before['status'] === 'active') {
+                $student->memberships()->whereNull('to_date')
+                    ->update(['to_date' => now()->toDateString()]);
+
+                $assignment = $student->activeCardAssignment;
+                if ($assignment) {
+                    app(\App\Services\CardService::class)
+                        ->unassign($assignment, null, 'Status siswa: '.$student->status.'.');
+                }
+            }
+
             AuditLogger::log('student.updated', Student::class, $student, before: $before, after: $student->only(['name', 'gender', 'status']));
         });
 

@@ -119,8 +119,15 @@ class PromotionService
                 $membership->update(['to_date' => $sourceYear->end_date]);
 
                 if (! $target) {
-                    // Grade tertinggi → lulus.
+                    // Grade tertinggi → lulus. Membership lama sudah ditutup di
+                    // atas; kartu RFID ikut dilepas agar bisa dipakai siswa baru.
                     $student->update(['status' => 'lulus']);
+
+                    $assignment = $student->activeCardAssignment;
+                    if ($assignment) {
+                        app(CardService::class)->unassign($assignment, null, 'Siswa lulus.');
+                    }
+
                     $lulus++;
                     continue;
                 }
