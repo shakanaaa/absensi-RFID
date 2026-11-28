@@ -53,6 +53,19 @@ class PromotionService
         });
     }
 
+    /**
+     * Setelah tahun ajaran baru dibuat, sinkronkan libur nasional untuk
+     * semua tahun Masehi yang dicakup periode tahun ajaran tsb.
+     */
+    public function syncHolidaysForYear(AcademicYear $year): void
+    {
+        app(HolidayService::class)->syncForSchoolRange(
+            $year->school_id,
+            $year->start_date->toDateString(),
+            $year->end_date->toDateString(),
+        );
+    }
+
     /** Periode default tahun ajaran baru: 10 Juli – 9 Juni, tahun setelah tahun sumber berakhir. */
     public static function defaultYearDates(AcademicYear $source): array
     {

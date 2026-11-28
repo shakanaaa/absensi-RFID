@@ -84,6 +84,8 @@ class PromotionController extends Controller
             $request->user()
         );
 
+        $promotion->syncHolidaysForYear($year);
+
         AuditLogger::log('promotion.year_prepared', AcademicYear::class, $year,
             after: $year->only(['name', 'start_date', 'end_date', 'status']));
 

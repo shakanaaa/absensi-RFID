@@ -127,13 +127,7 @@ class SettingsController extends Controller
         $data = $request->validate(['year' => ['required', 'integer', 'min:2000', 'max:2100']]);
         $year = (int) $data['year'];
 
-        $created = 0;
-        foreach ($holidays->holidaysForYear($year) as $date => $name) {
-            $created += SchoolHoliday::updateOrCreate(
-                ['school_id' => $request->user()->school_id, 'holiday_date' => $date],
-                ['name' => $name]
-            )->wasRecentlyCreated ? 1 : 0;
-        }
+        $created = $holidays->syncForSchool($request->user()->school_id, $year);
 
         AuditLogger::log('settings.holidays_generated', SchoolHoliday::class, $request->user()->school_id,
             after: ['year' => $year, 'created' => $created]);

@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\SchoolHoliday;
 use Illuminate\Support\Carbon;
 
 /**
@@ -9,12 +10,14 @@ use Illuminate\Support\Carbon;
  *
  * Yang selalu bisa dihitung untuk tahun berapa pun:
  *  - tanggal tetap (1 Jan, 1 Mei, 1 Jun, 17 Agu, 25 Des)
- *  - libur berbasis Paskah (Wafat Isa Almasih, Kenaikan Isa Almasih)
+ *  - libur Paskah (Wafat Isa Almasih = Paskah-2, Hari Paskah,
+ *    Kenaikan Isa Almasih = Paskah+39)
  *
  * Libur keagamaan/hari besar (Imlek, Nyepi, Idul Fitri, Idul Adha,
- * 1 Muharam, Maulid, Waisak, Isra Mikraj) mengikuti tanggal SKB 3 Menteri
- * untuk tahun yang tersedia di TAHUNAN di bawah. Tahun lain → kosong,
- * admin menambahkan manual lewat halaman Pengaturan.
+ * 1 Muharam, Maulid, Waisak, Isra Mikraj, cuti bersama) mengikuti
+ * tanggal SKB 3 Menteri untuk tahun yang tersedia di TAHUNAN.
+ * Tahun di luar tabulasi hanya mendapat tanggal tetap + Paskah;
+ * admin tetap bisa menambahkan manual lewat halaman Pengaturan.
  */
 class HolidayService
 {
@@ -63,6 +66,32 @@ class HolidayService
             '2026-08-25' => 'Maulid Nabi Muhammad SAW',
             '2026-12-25' => 'Hari Raya Natal',
         ],
+        2027 => [
+            '2027-01-01' => 'Tahun Baru 2027 M',
+            '2027-01-05' => 'Isra Mikraj Nabi Muhammad SAW 1448 H',
+            '2027-02-05' => 'Cuti Bersama Tahun Baru Imlek 2578 Kongzili',
+            '2027-02-06' => 'Tahun Baru Imlek 2578 Kongzili',
+            '2027-03-08' => 'Hari Suci Nyepi (Tahun Baru Saka 1949)',
+            '2027-03-09' => 'Cuti Bersama Idulfitri 1448 H',
+            '2027-03-10' => 'Idulfitri 1448 H',
+            '2027-03-11' => 'Idulfitri 1448 H',
+            '2027-03-12' => 'Cuti Bersama Idulfitri 1448 H',
+            '2027-03-15' => 'Cuti Bersama Idulfitri 1448 H',
+            '2027-03-25' => 'Cuti Bersama Wafat Isa Almasih',
+            '2027-03-26' => 'Wafat Isa Almasih',
+            '2027-03-28' => 'Hari Paskah',
+            '2027-05-06' => 'Kenaikan Isa Almasih',
+            '2027-05-17' => 'Iduladha 1448 H',
+            '2027-05-18' => 'Cuti Bersama Iduladha 1448 H',
+            '2027-05-19' => 'Cuti Bersama Hari Raya Waisak',
+            '2027-05-20' => 'Hari Raya Waisak 2571 BE',
+            '2027-06-06' => 'Tahun Baru Islam 1449 H',
+            '2027-08-15' => 'Maulid Nabi Muhammad SAW',
+            '2027-08-17' => 'Hari Kemerdekaan RI',
+            '2027-12-24' => 'Cuti Bersama Hari Raya Natal',
+            '2027-12-25' => 'Hari Raya Natal',
+            '2027-12-26' => 'Isra Mikraj Nabi Muhammad SAW 1449 H',
+        ],
     ];
 
     /**
@@ -88,7 +117,8 @@ class HolidayService
         // Berbasis Paskah (algoritma Meeus/Jones/Butcher).
         $easter = $this->easter($year);
         $holidays[$easter->copy()->subDays(2)->toDateString()] = 'Wafat Isa Almasih';
-        $holidays[$easter->copy()->addDay()->toDateString()] = 'Kenaikan Isa Almasih';
+        $holidays[$easter->copy()->toDateString()] = 'Hari Paskah';
+        $holidays[$easter->copy()->addDays(39)->toDateString()] = 'Kenaikan Isa Almasih';
 
         // Tabulasi SKB untuk tahun yang tersedia.
         foreach (self::TAHUNAN[$year] ?? [] as $date => $name) {
@@ -98,6 +128,40 @@ class HolidayService
         ksort($holidays);
 
         return $holidays;
+    }
+
+    /**
+     * Sinkronkan libur nasional satu tahun ke school_holidays satu sekolah.
+     * Idempotent — updateOrCreate per tanggal, tidak menghapus libur manual.
+     * Mengembalikan jumlah tanggal baru yang dibuat.
+     */
+    public function syncForSchool(int $schoolId, int $year): int
+    {
+        $created = 0;
+
+        foreach ($this->holidaysForYear($year) as $date => $name) {
+            $created += SchoolHoliday::updateOrCreate(
+                ['school_id' => $schoolId, 'holiday_date' => $date],
+                ['name' => $name]
+            )->wasRecentlyCreated ? 1 : 0;
+        }
+
+        return $created;
+    }
+
+    /**
+     * Sinkronkan libur nasional untuk semua tahun Masehi yang dicakup
+     * sebuah rentang tanggal (mis. start_date s.d. end_date tahun ajaran).
+     * Dipakai otomatis saat tahun ajaran baru dibuat dan oleh command harian.
+     */
+    public function syncForSchoolRange(int $schoolId, string $startDate, string $endDate): int
+    {
+        $total = 0;
+        for ($y = (int) substr($startDate, 0, 4); $y <= (int) substr($endDate, 0, 4); $y++) {
+            $total += $this->syncForSchool($schoolId, $y);
+        }
+
+        return $total;
     }
 
     /** Tanggal Paskah (Minggu) untuk tahun Masehi. */
