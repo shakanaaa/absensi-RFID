@@ -1,58 +1,125 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Sistem Absensi RFID — SMK
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Aplikasi absensi siswa berbasis RFID untuk sekolah. Siswa tap kartu RFID di halaman **Scan Absensi** (keyboard-wedge reader), status hadir/terlambat dihitung otomatis dari jam masuk, dan rekap harian bisa dikirim ke WhatsApp.
 
-## About Laravel
+- **Role**: Admin Sekolah & Petugas Piket
+- **Stack**: Laravel 13 + Inertia.js + Vue 3, MySQL
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Kebutuhan
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.5+
+- Composer 2.x
+- Node.js 20+ & npm
+- MySQL / MariaDB (XAMPP)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
-
-## Learning Laravel
-
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
-
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
-
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
-
-## Agentic Development
-
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+## Instalasi
 
 ```bash
-composer require laravel/boost --dev
+# 1. Install dependency PHP & frontend
+composer install
+npm install
 
-php artisan boost:install
+# 2. Setup environment
+cp .env.example .env
+php artisan key:generate
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+Sesuaikan `.env` — koneksi database:
 
-## Contributing
+```env
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_DATABASE=absensi
+DB_USERNAME=root
+DB_PASSWORD=
+```
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Buat database `absensi` dulu di phpMyAdmin / MySQL, lalu:
 
-## Code of Conduct
+```bash
+# 3. Migrasi + data awal (opsional — berisi data demo)
+php artisan migrate:fresh --seed
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# 4. Build frontend
+npm run build
 
-## Security Vulnerabilities
+# 5. Jalankan aplikasi
+php artisan serve        # http://localhost:8000
+```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+Kalau mau development frontend dengan hot reload, jalankan `npm run dev` di terminal terpisah.
 
-## License
+## Menjalankan Aplikasi
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+```bash
+php artisan serve
+```
+
+Buka http://localhost:8000 — login dengan akun yang dibuat lewat command di bawah.
+
+### Supaya libur nasional & laporan otomatis berjalan
+
+Scheduler Laravel perlu dipicu tiap menit. Pilih salah satu:
+
+```bash
+# Opsi 1: terminal khusus (biarkan tetap terbuka)
+php artisan schedule:work
+
+# Opsi 2: Windows Task Scheduler — jadwalkan tiap menit:
+#   Program: C:\xampp\php\php.exe
+#   Argumen: C:\xampp\htdocs\apk_absensi\artisan schedule:run
+```
+
+## Command Artisan Penting
+
+### Buat akun
+
+```bash
+php artisan admin:create <username>
+php artisan piket:create <username>
+```
+
+Contoh non-interaktif:
+
+```bash
+php artisan admin:create budi --name="Budi Santoso" --password=rahasia123
+php artisan piket:create ani --name="Ani Guru" --password=rahasia123
+```
+
+Opsi: `--name=`, `--password=`, `--school=<id>`.
+
+### Sinkron libur nasional
+
+```bash
+php artisan holidays:sync              # semua sekolah, semua tahun ajaran
+php artisan holidays:sync --school=1   # satu sekolah saja
+```
+
+Idempotent — aman dijalankan berulang. Sudah dijadwalkan harian via scheduler; libur juga otomatis terisi saat tahun ajaran baru dibuat.
+
+### Command bawaan Laravel yang sering dipakai
+
+```bash
+php artisan migrate:fresh --seed   # reset DB + data demo
+php artisan test                   # jalankan semua test
+npm run build                      # build frontend produksi
+php artisan route:list             # daftar semua route
+php artisan about                  # info environment
+```
+
+## Alur Pakai Sehari-hari
+
+1. **Login** → `admin` atau `guru.piket` (password diatur saat `admin:create`/`piket:create`)
+2. **Master Data** → isi Tahun Ajaran, Tingkat, Konsentrasi, Kelas, Siswa, Kartu RFID
+3. **Scan Absensi** → buka di PC yang tersambung reader RFID, dekatkan kartu siswa
+4. **Absensi** → pantau status per kelas per tanggal
+5. **Laporan** → rekap harian + tombol kirim ke WhatsApp
+6. **Kenaikan Kelas** → buat tahun ajaran baru (otomatis 10 Jul – 9 Jun) lalu promosikan
+7. **Pengaturan** → jam masuk/pulang, batas terlambat, nomor WA, konten laporan, libur mingguan & kalender libur
+
+## Catatan Teknis
+
+- Reader RFID harus mode **keyboard wedge** (ketik UID + Enter). Halaman Scan Absensi menangkap input keyboard.
+- Jam disimpan UTC di database; perhitungan status memakai timezone sekolah (`Asia/Jakarta`).
+- Test: `php artisan test` (pakai SQLite in-memory).
