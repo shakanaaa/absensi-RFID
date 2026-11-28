@@ -39,6 +39,7 @@ class SettingsController extends Controller
                 'whatsapp_number' => $settings->whatsapp_number,
                 'report_send_time' => $settings->report_send_time?->format('H:i'),
                 'weekly_off_days' => $settings->weekly_off_days ?? SchoolDayService::DEFAULT_OFF_DAYS,
+                'wa_report' => $settings->waReportSections(),
             ],
             'holidays' => SchoolHoliday::where('school_id', $school->id)
                 ->orderBy('holiday_date')->get(['id', 'holiday_date', 'name']),
@@ -62,6 +63,8 @@ class SettingsController extends Controller
             'report_send_time' => ['nullable', 'date_format:H:i'],
             'weekly_off_days' => ['present', 'array'],
             'weekly_off_days.*' => ['integer', 'between:1,7'],
+            'wa_report' => ['sometimes', 'array'],
+            'wa_report.*' => ['boolean'],
         ]);
 
         $school = School::findOrFail($request->user()->school_id);
@@ -75,6 +78,12 @@ class SettingsController extends Controller
                 'whatsapp_number' => $data['whatsapp_number'] ?? null,
                 'report_send_time' => isset($data['report_send_time']) ? $data['report_send_time'].':00' : null,
                 'weekly_off_days' => array_values(array_unique(array_map('intval', $data['weekly_off_days']))),
+                'wa_report_options' => isset($data['wa_report'])
+                    ? array_intersect_key($data['wa_report'], [
+                        'counts' => 1, 'hadir' => 1, 'terlambat' => 1,
+                        'tidak_hadir' => 1, 'belum_masuk' => 1,
+                    ])
+                    : null,
             ]
         );
 

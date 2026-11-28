@@ -22,7 +22,16 @@ const form = useForm({
     whatsapp_number: props.settings.whatsapp_number ?? '',
     report_send_time: props.settings.report_send_time ?? '',
     weekly_off_days: [...(props.settings.weekly_off_days ?? [6, 7])],
+    wa_report: { ...(props.settings.wa_report ?? {}) },
 });
+
+const WA_SECTIONS = [
+    { key: 'counts', label: 'Rekap jumlah per kelas' },
+    { key: 'hadir', label: 'Daftar nama Hadir' },
+    { key: 'terlambat', label: 'Daftar nama Terlambat' },
+    { key: 'tidak_hadir', label: 'Daftar nama Tidak Hadir' },
+    { key: 'belum_masuk', label: 'Daftar nama Belum Masuk' },
+];
 
 const WEEKDAYS = [
     { value: 1, label: 'Sen' },
@@ -128,6 +137,22 @@ const holidayDates = computed(() => new Set(props.holidays.map((h) => h.holiday_
                     </div>
                     <InputError :message="form.errors.weekly_off_days" class="mt-1" />
                     <p class="mt-1 text-xs text-gray-500">Hari yang dipilih tidak dihitung sebagai hari sekolah (tidak ada status tidak hadir).</p>
+                </div>
+
+                <div>
+                    <InputLabel value="Konten Laporan WhatsApp" />
+                    <div class="mt-2 grid gap-2 sm:grid-cols-2">
+                        <label
+                            v-for="s in WA_SECTIONS"
+                            :key="s.key"
+                            class="flex cursor-pointer items-center gap-2 rounded-md border border-gray-200 px-3 py-2 text-sm text-gray-700"
+                        >
+                            <input v-model="form.wa_report[s.key]" type="checkbox" class="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+                            {{ s.label }}
+                        </label>
+                    </div>
+                    <InputError :message="form.errors['wa_report']" class="mt-1" />
+                    <p class="mt-1 text-xs text-gray-500">Bagian yang dicentang akan ikut dikirim lewat tombol WhatsApp di halaman Laporan.</p>
                 </div>
 
                 <div class="flex justify-end">

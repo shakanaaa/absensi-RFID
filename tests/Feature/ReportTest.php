@@ -148,4 +148,62 @@ class ReportTest extends TestCase
         $res->assertOk();
         $this->assertArrayHasKey('counts', $res->viewData('page')['props']);
     }
+
+    public function test_whatsapp_text_only_includes_selected_sections(): void
+    {
+        $s2 = Student::create(['school_id' => $this->school->id, 'name' => 'Siswa Dua', 'status' => 'active']);
+        StudentClassMembership::create([
+            'student_id' => $s2->id, 'class_id' => $this->class->id,
+            'academic_year_id' => $this->student->memberships()->first()->academic_year_id,
+            'from_date' => '2026-01-01',
+        ]);
+
+        // Siswa 1 terlambat; siswa 2 tanpa sesi → tidak_hadir (tanggal lampau).
+        $this->makeSession('2026-11-25', 'terlambat', '2026-11-25 00:30:00');
+
+        $this->school->settings()->update([
+            'wa_report_options' => [
+                'counts' => false, 'hadir' => false,
+                'terlambat' => true, 'tidak_hadir' => true, 'belum_masuk' => false,
+            ],
+        ]);
+
+        $school = $this->school->fresh('settings');
+        $recap = app(\App\Services\DailyReportService::class)->recap($school, '2026-11-25');
+        $text = app(\App\Services\DailyReportService::class)->whatsappText($school, '2026-11-25', $recap);
+
+        $this->assertStringContainsString('Terlambat: Siswa Satu', $text);
+        $this->assertStringContainsString('Tidak Hadir: Siswa Dua', $text);
+        $this->assertStringNotContainsString('Hadir: 0', $text);
+        $this->assertStringNotContainsString('Belum Masuk:', $text);
+        $this->assertStringNotContainsString('|', $text); // baris rekap jumlah nonaktif
+    }
+
+    public function test_whatsapp_text_default_sections_unchanged(): void
+    {
+        $this->makeSession('2026-11-25', 'terlambat', '2026-11-25 00:30:00');
+
+        $school = $this->school->fresh('settings');
+        $recap = app(\App\Services\DailyReportService::class)->recap($school, '2026-11-25');
+        $text = app(\App\Services\DailyReportService::class)->whatsappText($school, '2026-11-25', $recap);
+
+        // Bawaan: rekap jumlah + daftar terlambat & tidak_hadir.
+        $this->assertStringContainsString('Terlambat: Siswa Satu', $text);
+        $this->assertStringContainsString('Hadir: 0 | Terlambat: 1 | Tidak Hadir: 0 | Belum Masuk: 0', $text);
+    }
+
+    public function test_admin_can_save_wa_report_options(): void
+    {
+        $this->actingAs($this->admin)->put(route('settings.update'), [
+            'check_in_time' => '07:00',
+            'check_out_time' => '15:00',
+            'weekly_off_days' => [6, 7],
+            'wa_report' => ['counts' => false, 'terlambat' => true, 'tidak_hadir' => true],
+        ])->assertRedirect();
+
+        $options = $this->school->settings()->first()->wa_report_options;
+        $this->assertFalse($options['counts']);
+        $this->assertTrue($options['terlambat']);
+        $this->assertArrayNotHasKey('hadir', $options);
+    }
 }

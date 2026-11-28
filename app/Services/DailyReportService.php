@@ -98,19 +98,46 @@ class DailyReportService
             return implode("\n", $lines);
         }
 
+        $sections = $school->settings?->waReportSections() ?? [
+            'counts' => true, 'hadir' => false, 'terlambat' => true,
+            'tidak_hadir' => true, 'belum_masuk' => false,
+        ];
+
+        $nameSections = [
+            'hadir' => 'Hadir',
+            'terlambat' => 'Terlambat',
+            'tidak_hadir' => 'Tidak Hadir',
+            'belum_masuk' => 'Belum Masuk',
+        ];
+
         foreach ($recap['classes'] as $class) {
-            $c = $class['counts'];
-            $lines[] = "*{$class['name']}* ({$class['total']} siswa)";
-            $lines[] = "Hadir: {$c['hadir']} | Terlambat: {$c['terlambat']} | Tidak Hadir: {$c['tidak_hadir']} | Belum Masuk: {$c['belum_masuk']}";
-
-            $late = collect($class['students'])->where('status', 'terlambat')->pluck('name');
-            $absent = collect($class['students'])->where('status', 'tidak_hadir')->pluck('name');
-
-            if ($late->isNotEmpty()) {
-                $lines[] = 'Terlambat: '.$late->implode(', ');
+            $names = [];
+            foreach ($nameSections as $key => $label) {
+                if (! ($sections[$key] ?? false)) {
+                    continue;
+                }
+                $list = collect($class['students'])->where('status', $key)->pluck('name');
+                if ($list->isNotEmpty()) {
+                    $names[$label] = $list;
+                }
             }
-            if ($absent->isNotEmpty()) {
-                $lines[] = 'Tidak Hadir: '.$absent->implode(', ');
+
+            // Tanpa rekap jumlah dan tanpa nama terpilih → kelas tidak ditampilkan.
+            if (! $sections['counts'] && $names === []) {
+                continue;
+            }
+
+            $lines[] = $sections['counts']
+                ? "*{$class['name']}* ({$class['total']} siswa)"
+                : "*{$class['name']}*";
+
+            if ($sections['counts']) {
+                $c = $class['counts'];
+                $lines[] = "Hadir: {$c['hadir']} | Terlambat: {$c['terlambat']} | Tidak Hadir: {$c['tidak_hadir']} | Belum Masuk: {$c['belum_masuk']}";
+            }
+
+            foreach ($names as $label => $list) {
+                $lines[] = "{$label}: ".$list->implode(', ');
             }
             $lines[] = '';
         }
