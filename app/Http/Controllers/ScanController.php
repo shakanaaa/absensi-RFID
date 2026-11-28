@@ -45,8 +45,27 @@ class ScanController extends Controller
                     'event_time' => $e->event_time->setTimezone($request->user()->school?->timezone ?: config('app.timezone'))->format('H:i:s'),
                 ]);
 
+        $tz = $request->user()->school?->timezone ?: config('app.timezone');
+        $today = now()->setTimezone($tz)->toDateString();
+
+        $rows = \App\Models\AttendanceSession::where('school_id', $schoolId)
+            ->whereDate('school_date', $today)
+            ->selectRaw('attendance_status, count(*) as total, sum(case when check_out_at is not null then 1 else 0 end) as pulang')
+            ->groupBy('attendance_status')
+            ->get()
+            ->keyBy('attendance_status');
+
+        $stats = [
+            'hadir' => (int) ($rows['hadir']->total ?? 0),
+            'terlambat' => (int) ($rows['terlambat']->total ?? 0),
+            'pulang' => (int) collect($rows)->sum('pulang'),
+            'belum' => (int) ($rows['belum_masuk']->total ?? 0),
+        ];
+
         return Inertia::render('Attendance/Scan', [
             'recent' => $recent,
+            'stats' => $stats,
+            'today' => $today,
         ]);
     }
 
