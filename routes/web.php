@@ -14,7 +14,6 @@ use App\Http\Controllers\SchoolClassController;
 use App\Http\Controllers\ScanController;
 use App\Http\Controllers\SettingsController;
 use App\Http\Controllers\StudentController;
-use App\Http\Controllers\TerminalController;
 use App\Http\Controllers\UserManagementController;
 use Illuminate\Support\Facades\Route;
 
@@ -36,7 +35,7 @@ Route::middleware('auth')->group(function () {
 
 /*
  | Master data — baca: admin & petugas piket. Tulis: admin saja
- | (kartu/registrasi/terminal: admin + petugas piket sebagai operator gerbang).
+ | (kartu/registrasi: admin + petugas piket sebagai operator gerbang).
  */
 Route::middleware(['auth', 'verified', 'role:admin,petugas_piket'])->prefix('master')->name('master.')->group(function () {
     Route::get('/academic-years', [AcademicYearController::class, 'index'])->name('academic-years.index');
@@ -49,7 +48,6 @@ Route::middleware(['auth', 'verified', 'role:admin,petugas_piket'])->prefix('mas
     Route::get('/registrations', [RegistrationSessionController::class, 'index'])->name('registrations.index');
     Route::get('/registrations/create', [RegistrationSessionController::class, 'create'])->name('registrations.create');
     Route::get('/registrations/{session}', [RegistrationSessionController::class, 'show'])->whereNumber('session')->name('registrations.show');
-    Route::get('/terminals', [TerminalController::class, 'index'])->name('terminals.index');
 });
 
 // Tulis master data — admin saja.
@@ -77,12 +75,6 @@ Route::middleware(['auth', 'verified', 'role:admin,petugas_piket'])->prefix('mas
     Route::post('/registrations/{session}/resume', [RegistrationSessionController::class, 'resume'])->name('registrations.resume');
     Route::post('/registrations/{session}/cancel', [RegistrationSessionController::class, 'cancel'])->name('registrations.cancel');
     Route::post('/registrations/{session}/finish', [RegistrationSessionController::class, 'finish'])->name('registrations.finish');
-
-    Route::post('/terminals', [TerminalController::class, 'store'])->name('terminals.store');
-    Route::patch('/terminals/{terminal}', [TerminalController::class, 'update'])->name('terminals.update');
-    Route::post('/terminals/{terminal}/token', [TerminalController::class, 'issueToken'])->name('terminals.token');
-    Route::post('/terminals/{terminal}/pairing-code', [TerminalController::class, 'createPairingCode'])->name('terminals.pairing-code');
-    Route::post('/terminal-tokens/{token}/revoke', [TerminalController::class, 'revokeToken'])->name('terminal-tokens.revoke');
 });
 
 // Scan absensi via reader keyboard-wedge di browser — admin + petugas piket.

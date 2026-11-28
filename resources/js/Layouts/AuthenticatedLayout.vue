@@ -21,7 +21,6 @@ const masterLinks = [
     { label: 'Siswa', route: 'master.students.index' },
     { label: 'Kartu RFID', route: 'master.cards.index' },
     { label: 'Registrasi Kartu', route: 'master.registrations.index' },
-    { label: 'Terminal', route: 'master.terminals.index' },
 ];
 </script>
 
