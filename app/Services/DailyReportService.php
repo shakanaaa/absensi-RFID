@@ -23,13 +23,8 @@ class DailyReportService
      */
     public function recap(School $school, string $date): array
     {
-        $settings = $school->settings;
         $isSchoolDay = app(SchoolDayService::class)->isEffectiveSchoolDay($school->id, $date);
-
-        // Lewat jam pulang → siswa tanpa check_in dianggap tidak_hadir.
-        $pastCheckout = $settings?->check_out_time !== null
-            && Carbon::now($school->timezone)->format('H:i:s') > $settings->check_out_time->format('H:i:s')
-            && $date <= Carbon::now($school->timezone)->toDateString();
+        $resolver = app(AttendanceStatusResolver::class);
 
         $classes = SchoolClass::where('school_id', $school->id)
             ->where('status', 'active')
@@ -59,8 +54,8 @@ class DailyReportService
                 $session = $sessions->get($student->id);
                 $status = $session?->attendance_status ?? AttendanceSession::STATUS_BELUM_MASUK;
 
-                if ($isSchoolDay && $pastCheckout && $status === AttendanceSession::STATUS_BELUM_MASUK) {
-                    $status = AttendanceSession::STATUS_TIDAK_HADIR;
+                if ($isSchoolDay) {
+                    $status = $resolver->resolve($school, $date, $status);
                 }
 
                 $counts[match ($status) {

@@ -35,6 +35,7 @@ class SettingsController extends Controller
             'settings' => [
                 'check_in_time' => $settings->check_in_time?->format('H:i'),
                 'check_out_time' => $settings->check_out_time?->format('H:i'),
+                'late_deadline_time' => $settings->late_deadline_time?->format('H:i'),
                 'whatsapp_number' => $settings->whatsapp_number,
                 'report_send_time' => $settings->report_send_time?->format('H:i'),
                 'weekly_off_days' => $settings->weekly_off_days ?? SchoolDayService::DEFAULT_OFF_DAYS,
@@ -56,6 +57,7 @@ class SettingsController extends Controller
         $data = $request->validate([
             'check_in_time' => ['required', 'date_format:H:i'],
             'check_out_time' => ['required', 'date_format:H:i', 'after:check_in_time'],
+            'late_deadline_time' => ['nullable', 'date_format:H:i', 'after:check_in_time', 'before:check_out_time'],
             'whatsapp_number' => ['nullable', 'string', 'max:20', 'regex:/^[0-9+\-\s()]+$/'],
             'report_send_time' => ['nullable', 'date_format:H:i'],
             'weekly_off_days' => ['present', 'array'],
@@ -69,6 +71,7 @@ class SettingsController extends Controller
             [
                 'check_in_time' => $data['check_in_time'].':00',
                 'check_out_time' => $data['check_out_time'].':00',
+                'late_deadline_time' => isset($data['late_deadline_time']) ? $data['late_deadline_time'].':00' : null,
                 'whatsapp_number' => $data['whatsapp_number'] ?? null,
                 'report_send_time' => isset($data['report_send_time']) ? $data['report_send_time'].':00' : null,
                 'weekly_off_days' => array_values(array_unique(array_map('intval', $data['weekly_off_days']))),

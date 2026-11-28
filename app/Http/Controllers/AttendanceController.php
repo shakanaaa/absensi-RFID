@@ -30,10 +30,8 @@ class AttendanceController extends Controller
             : now($tz)->toDateString();
 
         $isSchoolDay = $days->isEffectiveSchoolDay($school->id, $date);
+        $resolver = app(\App\Services\AttendanceStatusResolver::class);
         $today = now($tz)->toDateString();
-        $pastCheckout = $school->settings?->check_out_time !== null
-            && ($date < $today
-                || ($date === $today && now($tz)->format('H:i:s') > $school->settings->check_out_time->format('H:i:s')));
 
         $classes = SchoolClass::where('school_id', $school->id)
             ->where('status', 'active')
@@ -58,12 +56,12 @@ class AttendanceController extends Controller
             ->get()
             ->keyBy('student_id');
 
-        $rows = $students->map(function ($s) use ($sessions, $tz, $isSchoolDay, $pastCheckout) {
+        $rows = $students->map(function ($s) use ($sessions, $tz, $isSchoolDay, $resolver, $school, $date) {
             $session = $sessions->get($s->id);
             $status = $session?->attendance_status ?? AttendanceSession::STATUS_BELUM_MASUK;
 
-            if ($isSchoolDay && $pastCheckout && $status === AttendanceSession::STATUS_BELUM_MASUK) {
-                $status = AttendanceSession::STATUS_TIDAK_HADIR;
+            if ($isSchoolDay) {
+                $status = $resolver->resolve($school, $date, $status);
             }
 
             return [

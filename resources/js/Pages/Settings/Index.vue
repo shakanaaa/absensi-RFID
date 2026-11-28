@@ -18,6 +18,7 @@ const props = defineProps({
 const form = useForm({
     check_in_time: props.settings.check_in_time ?? '07:00',
     check_out_time: props.settings.check_out_time ?? '15:00',
+    late_deadline_time: props.settings.late_deadline_time ?? '',
     whatsapp_number: props.settings.whatsapp_number ?? '',
     report_send_time: props.settings.report_send_time ?? '',
     weekly_off_days: [...(props.settings.weekly_off_days ?? [6, 7])],
@@ -84,6 +85,12 @@ const holidayDates = computed(() => new Set(props.holidays.map((h) => h.holiday_
                         <InputLabel for="check_out_time" value="Jam Pulang" />
                         <TextInput id="check_out_time" v-model="form.check_out_time" type="time" class="mt-1 w-full" required />
                         <InputError :message="form.errors.check_out_time" class="mt-1" />
+                    </div>
+                    <div>
+                        <InputLabel for="late_deadline_time" value="Batas Selesai Terlambat (opsional)" />
+                        <TextInput id="late_deadline_time" v-model="form.late_deadline_time" type="time" class="mt-1 w-full" />
+                        <InputError :message="form.errors.late_deadline_time" class="mt-1" />
+                        <p class="mt-1 text-xs text-gray-500">Siswa yang belum absen masuk setelah jam ini dinyatakan terlambat. Kosongkan untuk nonaktif.</p>
                     </div>
                 </div>
 

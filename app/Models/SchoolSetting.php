@@ -14,6 +14,7 @@ class SchoolSetting extends Model
         return [
             'check_in_time' => 'datetime:H:i:s',
             'check_out_time' => 'datetime:H:i:s',
+            'late_deadline_time' => 'datetime:H:i:s',
             'report_send_time' => 'datetime:H:i:s',
             'weekly_off_days' => 'array',
         ];
